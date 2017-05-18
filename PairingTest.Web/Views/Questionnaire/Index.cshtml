@@ -1,10 +1,75 @@
-﻿@model PairingTest.Web.Models.QuestionnaireViewModel
+﻿@using System.Web.Optimization
+@model PairingTest.Web.Models.QuestionnaireViewModel
 
-<html>
-    <head>
-        <title>@Model.QuestionnaireTitle</title>
-    </head>
-    <body>
-              
-    </body>
-</html>
+@{
+    ViewBag.Title = "Questionnaire";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form id="newQuestionnaire">
+        @if (Model != null)
+        {
+            <h2>@Model.QuestionnaireTitle</h2>
+            <br />
+         int i = 0;
+         foreach (var q in Model.QuestionsText)
+         {
+            <div class="form-group">
+                <div class="row">
+                    <label for=@string.Format("InputAnswer{0}",i) class="control-label col-sm-6 col-md-3">@q</label>
+                    <div class="col-sm-6 col-md-9">
+                        <input type="text" class="form-control" id=@string.Format("InputAnswer{0}",i) data-rule-required="true"  placeholder="Enter answer">
+                    </div>
+                </div>
+            </div>
+             i++;
+            }
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-primary">Save</button>
+        }
+        else
+        {
+            Html.RenderPartial("NoResults");
+        }
+    </form>
+
+       
+
+@section scripts{
+@Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">  
+        $(document).ready(function () {
+            var vm = {
+                questAns:[] // array bidimensional for the questions and answers.
+            };
+            var validator = $("#newQuestionnaire").validate({
+                submitHandler: function () {
+                    $.ajax({
+                        //TODO
+                        //  url: "/api/newQuesionsAnswers", new api to save the answers in a new entity.
+                        //method: "POST",
+                        //data: vm
+                    })
+                    .done(function () {
+                        toastr.success("Questionnaire succesfully recorded.");                        
+                        $('.input').val("");                   
+
+                        vm = {
+                            questAns: []
+                        };
+
+                        validator.resetForm();
+                    })
+                    .fail(function () {
+                        toastr.error("Something unexpected happened.");
+                    });
+                    return false;
+                }
+            });
+
+        });
+    </script>
+
+
+}
+
